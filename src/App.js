@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "./App.css";
 import SpeechRecognition, {
   useSpeechRecognition,
@@ -10,9 +10,20 @@ import ClientProvider from "./components/ClientProvider";
 function App() {
   const [isCopied, copyClipboard] = useCopyClipboard({ timeout: 2500 });
   const startListening = () => SpeechRecognition.startListening({ continuous: true });
+  const [isListening, setListening]=useState(false);
   const { transcript, browserSupportsSpeechRecognition, resetTranscript } = useSpeechRecognition();
   if (!browserSupportsSpeechRecognition) {
     return null;
+  }
+  const handleListening=()=>{
+    if(!isListening){
+      startListening();
+      setListening(true);
+    }
+    else{
+      SpeechRecognition.stopListening();
+      setListening(false);
+    }
   }
   return (
     <div className="container items-center mx-auto flex flex-col">
@@ -35,16 +46,10 @@ function App() {
       </div>
       <div className="space-x-4 m-4">
         <button
-          onClick={startListening}
+          onClick={()=>handleListening()}
           className="rounded-xl border-2  border-red-500 px-5 py-3 text-base mb-3 font-medium text-red-500 transition duration-200 hover:bg-red-600/5 active:bg-red-700/5"
         >
-          start listening
-        </button>
-        <button
-          onClick={SpeechRecognition.stopListening}
-          className="rounded-xl border-2  border-red-500 px-5 py-3 text-base mb-3 font-medium text-red-500 transition duration-200 hover:bg-red-600/5 active:bg-red-700/5"
-        >
-          stop listening
+          {isListening?"stop listening":"start listening"}
         </button>
         <button
           disabled={isCopied}
